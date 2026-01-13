@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package="github.com/marketplace-go-backend/common/order";
+import "google/protobuf/timestamp.proto";
+
+message FindOrderRequest {
+    string orderId = 1;
+}
+
+message FindOrderResponse {
+    string id = 1;
+    string buyerId = 2;
+    string sellerId = 3;
+    string productId = 4;
+    uint32 quantity = 5;
+    uint64 totalAmount = 6;
+    string status = 7;
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+}
+
+service OrderService {
+    rpc FindOrder(FindOrderRequest) returns (FindOrderResponse) {}
+}

@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+option go_package="github.com/marketplace-go-backend/common/user";
+import "google/protobuf/timestamp.proto";
+
+message SaveBuyerRequest {
+    string id             = 1;
+    string username       = 2;
+    string email          = 3;
+    string country        = 4;
+    string profilePicture = 5;
+    bool isSeller       = 6;
+    string stripeAccountId = 7;
+    google.protobuf.Timestamp createdAt      = 8;
+}
+
+message SaveBuyerResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message FindSellerRequest {
+    string sellerId = 1;
+    string buyerId = 2;
+}
+
+message FindSellerResponse {
+    string id = 1;
+    string fullName         = 2;
+    string email = 3;
+    int64 ratingsCount     = 4;
+    int64 ratingSum        = 5;
+    string stripeAccountId = 6;
+    RatingCategory ratingCategories = 7;
+}
+
+message RatingCategory {
+    int32 five  = 1;
+    int32 four  = 2;
+    int32 three = 3;
+    int32 two   = 4;
+    int32 one   = 5;
+}
+
+message UpdateSellerBalanceRequest {
+    string sellerId = 1;
+    uint64 amount = 2;
+}
+
+message UpdateSellerBalanceResponse {
+	string id = 1;
+    string bio = 2;
+    string fullName = 3;
+    string email = 4;
+    int64 ratingsCount = 5;
+    int64 ratingSum = 6;
+    RatingCategory ratingCategories = 7;
+	string stripeAccountID = 8;
+	uint64 accountBalance = 9;
+}
+
+message FindBuyerRequest {
+    string buyerId = 1;
+}
+
+message FindBuyerResponse {
+	string id             = 1;
+	string username       = 2;
+	string email          = 3;
+	string country        = 4;
+	string profilePicture = 5;
+}
+
+service UserService {
+    rpc SaveBuyerData(SaveBuyerRequest) returns (SaveBuyerResponse) {}
+    rpc FindSeller(FindSellerRequest) returns (FindSellerResponse) {}
+    rpc UpdateSellerBalance(UpdateSellerBalanceRequest) returns (UpdateSellerBalanceResponse) {}
+    rpc FindBuyer(FindBuyerRequest) returns (FindBuyerResponse) {}
+}

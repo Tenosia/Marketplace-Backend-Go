@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package="github.com/marketplace-go-backend/common/product";
+import "google/protobuf/timestamp.proto";
+
+message FindProductRequest {
+    string productId = 1;
+}
+
+message FindProductResponse {
+    string id = 1;
+    string sellerId = 2;
+    string name = 3;
+    string description = 4;
+    uint64 price = 5;
+    uint32 stock = 6;
+    repeated string images = 7;
+    string category = 8;
+    google.protobuf.Timestamp createdAt = 9;
+    google.protobuf.Timestamp updatedAt = 10;
+}
+
+service ProductService {
+    rpc FindProduct(FindProductRequest) returns (FindProductResponse) {}
+}

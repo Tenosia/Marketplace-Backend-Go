@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package="github.com/marketplace-go-backend/common/payment";
+import "google/protobuf/timestamp.proto";
+
+message ProcessPaymentRequest {
+    string orderId = 1;
+    string buyerId = 2;
+    uint64 amount = 3;
+    string paymentMethod = 4;
+}
+
+message ProcessPaymentResponse {
+    bool success = 1;
+    string paymentId = 2;
+    string message = 3;
+}
+
+message FindPaymentRequest {
+    string paymentId = 1;
+}
+
+message FindPaymentResponse {
+    string id = 1;
+    string orderId = 2;
+    string buyerId = 3;
+    uint64 amount = 4;
+    string status = 5;
+    string paymentMethod = 6;
+    google.protobuf.Timestamp createdAt = 7;
+}
+
+service PaymentService {
+    rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse) {}
+    rpc FindPayment(FindPaymentRequest) returns (FindPaymentResponse) {}
+}

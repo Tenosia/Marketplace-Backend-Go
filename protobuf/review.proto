@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package="github.com/marketplace-go-backend/common/review";
+import "google/protobuf/timestamp.proto";
+
+message FindReviewRequest {
+    string reviewId = 1;
+}
+
+message FindReviewResponse {
+    string id = 1;
+    string orderId = 2;
+    string buyerId = 3;
+    string productId = 4;
+    string sellerId = 5;
+    int32 rating = 6;
+    string comment = 7;
+    google.protobuf.Timestamp createdAt = 8;
+}
+
+service ReviewService {
+    rpc FindReview(FindReviewRequest) returns (FindReviewResponse) {}
+}
