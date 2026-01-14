@@ -1,21 +1,41 @@
 package handler
 
 import (
-	"net/http"
+	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type BaseHandler struct {
-	baseURL string
-}
+func sendHttpReqToAnotherService(c *fiber.Ctx, url string) (int, []byte, []error) {
+	a := fiber.AcquireAgent()
+	a.Debug()
 
-func NewBaseHandler(baseURL string) *BaseHandler {
-	return &BaseHandler{
-		baseURL: baseURL,
+	req := a.Request()
+	req.Header.SetMethod(c.Method())
+	req.SetRequestURI(url)
+	gatewayToken, _ := c.UserContext().Value("gatewayToken").(string)
+	req.Header.Add("gatewayToken", gatewayToken)
+
+	tokenStr := c.Cookies("token", "")
+	if tokenStr == "" {
+		authHeader := c.Get("Authorization", "")
+		if authHeader != "" && len(strings.Split(authHeader, " ")) > 1 {
+			tokenStr = strings.Split(authHeader, " ")[1]
+		}
 	}
-}
+	a.Cookie("token", tokenStr)
 
-func (h *BaseHandler) HealthCheck(c *fiber.Ctx) error {
-	return c.Status(http.StatusOK).SendString("Service is healthy and OK")
+	if len(c.Body()) > 0 {
+		a.ContentType(c.Get("Content-Type", "application/json"))
+		req.Header.Add("Accept", c.Get("Accept", "*"))
+		a.Body(c.Body())
+	}
+
+	if err := a.Parse(); err != nil {
+		log.Printf("send http request to another service error:\n+%v", err)
+		panic(err)
+	}
+
+	return a.Bytes()
 }

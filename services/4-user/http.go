@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/marketplace-go-backend/services/4-user/handler"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,8 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewHttpServer(db *gorm.DB, ccs *handler.GRPCClients) {
-	port := os.Getenv("USER_HTTP_PORT")
+func NewHttpServer(db *gorm.DB) {
+	port := os.Getenv("PORT")
 
 	app := fiber.New(fiber.Config{
 		BodyLimit:     5 * 1024 * 1024,
@@ -28,15 +27,15 @@ func NewHttpServer(db *gorm.DB, ccs *handler.GRPCClients) {
 		Level: compress.LevelBestCompression,
 	}))
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     os.Getenv("CLIENT_URL"),
+		AllowOrigins:     os.Getenv("GATEWAY_URL"),
 		AllowCredentials: true,
 	}))
 	app.Use(helmet.New())
 	app.Use(logger.New())
 
-	MainRouter(app, db, ccs)
+	MainRouter(db, app)
 
 	if err := app.Listen(port); err != nil {
-		log.Fatalf("Failed listening fiber app with port: %s", port)
+		log.Fatalf("Failed listening to localhost%s", port)
 	}
 }

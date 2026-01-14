@@ -21,7 +21,7 @@ func main() {
 
 	ccs := handler.NewGRPCClients()
 
-	go NewHttpServer(db, ccs)
+	go NewHttpServer(db)
 
 	grpcServer := NewGRPCServer(os.Getenv("USER_GRPC_PORT"))
 	err = grpcServer.Run(db)

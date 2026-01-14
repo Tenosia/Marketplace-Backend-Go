@@ -24,8 +24,12 @@ func main() {
 	db.Debug().Exec(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`)
 
 	ccs := handler.NewGRPCClients()
-	ccs.AddClient(types.USER_SERVICE, os.Getenv("USER_GRPC_PORT"))
-	ccs.AddClient(types.NOTIFICATION_SERVICE, os.Getenv("NOTIFICATION_GRPC_PORT"))
+	if err := ccs.AddClient(types.USER_SERVICE, os.Getenv("USER_GRPC_PORT")); err != nil {
+		log.Fatalf("Failed to connect to user service: %v", err)
+	}
+	if err := ccs.AddClient(types.NOTIFICATION_SERVICE, os.Getenv("NOTIFICATION_GRPC_PORT")); err != nil {
+		log.Fatalf("Failed to connect to notification service: %v", err)
+	}
 
 	go NewHttpServer(db, cld, ccs)
 
