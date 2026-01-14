@@ -22,6 +22,9 @@ func main() {
 	}
 
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":8080"
+	}
 	config.NewGoogleAuthConfig(port)
 
 	app := fiber.New(fiber.Config{
