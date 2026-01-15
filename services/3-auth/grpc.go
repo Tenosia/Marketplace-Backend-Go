@@ -29,7 +29,7 @@ func (s *gRPCServer) Run(db *gorm.DB) error {
 	grpcServer := grpc.NewServer()
 
 	authSvc := service.NewAuthService(db)
-	handler.NewAuthGRPCHandler(grpcServer, authSvc)
+	handler.NewAuthGRPCHandler(grpcServer, authSvc.(service.AuthServiceImpl))
 
 	log.Println("starting grpc server on", s.addr)
 
