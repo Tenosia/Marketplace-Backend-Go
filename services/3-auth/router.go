@@ -29,7 +29,7 @@ func MainRouter(app *fiber.App, db *gorm.DB, cld *util.Cloudinary, ccs *handler.
 	api.Use(verifyGatewayReq)
 
 	as := service.NewAuthService(db)
-	ah := handler.NewAuthHttpHandler(as, cld, ccs)
+	ah := handler.NewAuthHttpHandler(as.(service.AuthServiceImpl), cld, ccs)
 
 	api.Post("/signin", ah.SignIn)
 	api.Post("/signup", ah.SignUp)
