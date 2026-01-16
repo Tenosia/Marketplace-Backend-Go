@@ -27,11 +27,11 @@ func NewAuthHandler(base_url string) *AuthHandler {
 
 func (ah *AuthHandler) HealthCheck(c *fiber.Ctx) error {
 	route := ah.base_url + "/health-check"
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - health check error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("AUTH - health check error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
@@ -130,16 +130,15 @@ func (ah *AuthHandler) SignIn(c *fiber.Ctx) error {
 		break
 	}
 
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - sign in error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("AUTH - sign in error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
 	if statusCode >= 400 {
-		fmt.Println("AUTH - sign in error", errs)
 		return c.Status(statusCode).Send(body)
 	}
 
@@ -199,16 +198,15 @@ func (ah *AuthHandler) SignUpWithGoogle(c *fiber.Ctx) error {
 
 func (ah *AuthHandler) SignUp(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/signup")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - sign up error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("AUTH - sign up error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
 	if statusCode >= 400 {
-		fmt.Println("AUTH - sign up error", errs)
 		return c.Status(statusCode).Send(body)
 	}
 
@@ -233,91 +231,42 @@ func (ah *AuthHandler) SignUp(c *fiber.Ctx) error {
 
 func (ah *AuthHandler) GetUserInfo(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/user-info")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - get user info error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "get user info")
 }
 
 func (ah *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/refresh-token/%s", c.Params("username"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - refresh token error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "refresh token")
 }
 
 func (ah *AuthHandler) SendVerifyEmailURL(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/send-verification-email")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - send verification email error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "send verification email")
 }
 
 func (ah *AuthHandler) VerifyEmail(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/verify-email/%s", c.Params("token"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - verifying email error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "verify email")
 }
 
 func (ah *AuthHandler) SendForgotPasswordURL(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/forgot-password/%s", c.Params("email"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - send forgot password url error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "send forgot password url")
 }
 
 func (ah *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/reset-password/%s", c.Params("token"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - reset password error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "reset password")
 }
 
 func (ah *AuthHandler) ChangePassword(c *fiber.Ctx) error {
 	route := ah.base_url + fmt.Sprintf("/api/v1/auths/change-password")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("AUTH - change password error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "AUTH", "change password")
 }
