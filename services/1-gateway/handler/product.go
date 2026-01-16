@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,11 +19,11 @@ func NewProductHandler(base_url string) *ProductHandler {
 
 func (ph *ProductHandler) HealthCheck(c *fiber.Ctx) error {
 	route := ph.base_url + "/health-check"
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - health check error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("PRODUCT - health check error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
@@ -33,143 +34,66 @@ func (ph *ProductHandler) HealthCheck(c *fiber.Ctx) error {
 
 func (ph *ProductHandler) GetPopularProducts(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/popular")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - get popular products error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "get popular products")
 }
 
 func (ph *ProductHandler) FindProductByID(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/id/%s", c.Params("id"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - find product by id error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "find product by id")
 }
 
 func (ph *ProductHandler) FindProductsByCategory(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/category/%s/%s/%s", c.Params("category"), c.Params("page"), c.Params("size"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - find products by category error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "find products by category")
 }
 
 func (ph *ProductHandler) FindSimilarProducts(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/similar/%s/%s/%s", c.Params("productId"), c.Params("page"), c.Params("size"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - find similar products error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "find similar products")
 }
 
 func (ph *ProductHandler) ProductQuerySearch(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/search/%s/%s", c.Params("page"), c.Params("size"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - product query search error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "product query search")
 }
 
 func (ph *ProductHandler) FindSellerActiveProducts(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/sellers/active/%s/%s", c.Params("page"), c.Params("size"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - find seller active products error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "find seller active products")
 }
 
 func (ph *ProductHandler) FindSellerInactiveProducts(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/sellers/inactive/%s/%s", c.Params("page"), c.Params("size"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - find seller inactive products error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "find seller inactive products")
 }
 
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - create product error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "create product")
 }
 
 func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/%s/%s", c.Params("sellerId"), c.Params("productId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - update product error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "update product")
 }
 
 func (ph *ProductHandler) ActivateProductStatus(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/update-status/%s/%s", c.Params("sellerId"), c.Params("productId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - activate product status error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "activate product status")
 }
 
 func (ph *ProductHandler) DeactivateProductStatus(c *fiber.Ctx) error {
 	route := ph.base_url + fmt.Sprintf("/api/v1/products/%s/%s", c.Params("sellerId"), c.Params("productId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("PRODUCT - deactivate product status error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "PRODUCT", "deactivate product status")
 }

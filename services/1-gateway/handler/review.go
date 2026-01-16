@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,11 +19,11 @@ func NewReviewHandler(base_url string) *ReviewHandler {
 
 func (rh *ReviewHandler) HealthCheck(c *fiber.Ctx) error {
 	route := rh.base_url + "/health-check"
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - health check error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("REVIEW - health check error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
@@ -33,65 +34,30 @@ func (rh *ReviewHandler) HealthCheck(c *fiber.Ctx) error {
 
 func (rh *ReviewHandler) FindSellerReviews(c *fiber.Ctx) error {
 	route := rh.base_url + fmt.Sprintf("/api/v1/reviews/seller/%s", c.Params("sellerId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - find seller reviews error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "REVIEW", "find seller reviews")
 }
 
 func (rh *ReviewHandler) FindProductReviews(c *fiber.Ctx) error {
 	route := rh.base_url + fmt.Sprintf("/api/v1/reviews/product/%s", c.Params("productId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - find product reviews error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "REVIEW", "find product reviews")
 }
 
 func (rh *ReviewHandler) Add(c *fiber.Ctx) error {
 	route := rh.base_url + fmt.Sprintf("/api/v1/reviews")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - add review error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "REVIEW", "add review")
 }
 
 func (rh *ReviewHandler) Update(c *fiber.Ctx) error {
 	route := rh.base_url + fmt.Sprintf("/api/v1/reviews/%s", c.Params("reviewId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - update review error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "REVIEW", "update review")
 }
 
 func (rh *ReviewHandler) Remove(c *fiber.Ctx) error {
 	route := rh.base_url + fmt.Sprintf("/api/v1/reviews/%s", c.Params("reviewId"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("REVIEW - remove review error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "REVIEW", "remove review")
 }

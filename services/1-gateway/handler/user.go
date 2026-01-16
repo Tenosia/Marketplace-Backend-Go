@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,11 +19,11 @@ func NewUserHandler(base_url string) *UserHandler {
 
 func (uh *UserHandler) HealthCheck(c *fiber.Ctx) error {
 	route := uh.base_url + "/health-check"
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - health check error", errs)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	if err != nil {
+		log.Printf("USER - health check error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
+			"error": err.Error(),
 		})
 	}
 
@@ -33,117 +34,54 @@ func (uh *UserHandler) HealthCheck(c *fiber.Ctx) error {
 
 func (uh *UserHandler) GetMyBuyerInfo(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/buyers/my-info")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - get my buyer info error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "get my buyer info")
 }
 
 func (uh *UserHandler) FindBuyerByUsername(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/buyers/%s", c.Params("username"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - find buyer by username error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "find buyer by username")
 }
 
 func (uh *UserHandler) GetMySellerInfo(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers/my-info")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - get my seller info error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "get my seller info")
 }
 
 func (uh *UserHandler) FindSellerByID(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers/id/%s", c.Params("id"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - find seller by id error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "find seller by id")
 }
 
 func (uh *UserHandler) FindSellerByUsername(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers/username/%s", c.Params("username"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - find seller by username error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "find seller by username")
 }
 
 func (uh *UserHandler) GetRandomSellers(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers/random/%s", c.Params("count"))
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - get random sellers error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "get random sellers")
 }
 
 func (uh *UserHandler) Create(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - creating seller error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "create seller")
 }
 
 func (uh *UserHandler) UpdateSeller(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/sellers")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - updating seller error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "update seller")
 }
 
 func (uh *UserHandler) UpdateBuyer(c *fiber.Ctx) error {
 	route := uh.base_url + fmt.Sprintf("/api/v1/users/buyers")
-	statusCode, body, errs := sendHttpReqToAnotherService(c, route)
-	if len(errs) > 0 {
-		fmt.Println("USER - updating buyer error", errs)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errs": errs,
-		})
-	}
-
-	return c.Status(statusCode).Send(body)
+	statusCode, body, err := sendHttpReqToAnotherService(c, route)
+	return handleServiceResponse(c, statusCode, body, err, "USER", "update buyer")
 }
